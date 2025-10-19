@@ -73,7 +73,7 @@ def get_api_answer(timestamp):
         )
         if response.status_code != HTTPStatus.OK:
             raise ConnectionError(
-                f'Эндпоинт {ENDPOINT} недоступен.'
+                f'Эндпоинт {ENDPOINT} недоступен. '
                 f'Код ответа: {response.status_code}'
             )
         return response.json()
@@ -82,7 +82,7 @@ def get_api_answer(timestamp):
 
 
 def check_response(response):
-    """Проверяет ответ API"""
+    """Проверяет ответ API."""
     if not isinstance(response, dict):
         raise TypeError('Ответ API не является словарём')
     if 'homeworks' not in response:
@@ -96,7 +96,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Извлекает статус домашней работы"""
+    """Извлекает статус домашней работы."""
     if 'homework_name' not in homework:
         raise KeyError('Отсутствует ключ "homework_name" в ответе API')
     if 'status' not in homework:
