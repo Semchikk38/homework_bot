@@ -128,8 +128,9 @@ def main():
 
             if homeworks:
                 homework = homeworks[0]
-                message = parse_status(homework)
-                send_message(bot, message)
+                status_message = parse_status(homework)
+                if send_message(bot, status_message):
+                    logger.debug('Статус домашней работы отправлен')
             else:
                 logger.debug('Новых статусов нет')
 
