@@ -139,8 +139,8 @@ def main():
             error_message = f'Сбой в работе программы: {error}'
             logger.error(error_message)
             if error_message != last_error:
-                send_message(bot, error_message)
-                last_error = error_message
+                if send_message(bot, error_message):
+                    last_error = error_message
         time.sleep(RETRY_PERIOD)
 
 
