@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Настройка логгера с улучшенным форматом
 log_format = (
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s - '
     '[%(filename)s:%(lineno)d]'
@@ -23,7 +22,8 @@ logging.basicConfig(
     handlers=[
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(
-            os.path.join(os.path.dirname(__file__), 'homework_bot.log')
+            os.path.join(os.path.dirname(__file__), 'homework_bot.log'),
+            encoding='utf-8'
         )
     ]
 )
@@ -48,13 +48,9 @@ HOMEWORK_VERDICTS = {
 class InvalidResponseCodeError(Exception):
     """Исключение для неверного кода ответа API."""
 
-    pass
-
 
 class MissingTokenError(Exception):
     """Исключение для отсутствующих токенов."""
-
-    pass
 
 
 def check_tokens():
@@ -93,16 +89,16 @@ def get_api_answer(timestamp):
     }
 
     logger.info(
-        f'Запрос к API: {request_params["url"]} '
-        f'с параметрами {request_params["params"]}'
+        'Запрос к API: {url} с параметрами {params}'.format(**request_params)
     )
 
     try:
         response = requests.get(**request_params)
     except requests.RequestException as error:
         raise ConnectionError(
-            f'Ошибка подключения: {error}. '
-            f'Параметры запроса: {request_params}'
+            'Ошибка подключения: {error}. Параметры запроса: {params}'.format(
+                error=error, params=request_params
+            )
         )
 
     if response.status_code != HTTPStatus.OK:
@@ -149,15 +145,11 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-    try:
-        check_tokens()
-    except MissingTokenError as error:
-        logger.critical(error)
-        sys.exit('Отсутствуют обязательные переменные окружения')
+    check_tokens()
 
     bot = telebot.TeleBot(TELEGRAM_TOKEN)
     timestamp = int(time.time())
-    last_status_message = None
+    last_status_message = ""
 
     while True:
         try:
@@ -171,18 +163,18 @@ def main():
             homework = homeworks[0]
             current_status_message = parse_status(homework)
 
-            if current_status_message != last_status_message:
-                if send_message(bot, current_status_message):
-                    logger.debug('Статус домашней работы отправлен')
-                    last_status_message = current_status_message
-                    timestamp = response.get('current_date', timestamp)
+            if (current_status_message != last_status_message and send_message(
+                bot, current_status_message
+            )):
+                last_status_message = current_status_message
+                timestamp = response.get('current_date', timestamp)
 
         except Exception as error:
             error_message = f'Сбой в работе программы: {error}'
             logger.exception(error_message)
-            if error_message != last_status_message and send_message(
+            if (error_message != last_status_message and send_message(
                 bot, error_message
-            ):
+            )):
                 last_status_message = error_message
 
         finally:
