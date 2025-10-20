@@ -47,11 +47,13 @@ HOMEWORK_VERDICTS = {
 
 class InvalidResponseCodeError(Exception):
     """Исключение для неверного кода ответа API."""
+
     pass
 
 
 class MissingTokenError(Exception):
     """Исключение для отсутствующих токенов."""
+
     pass
 
 
